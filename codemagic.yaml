@@ -17,9 +17,21 @@ workflows:
           -----END PRIVATE KEY-----
 
     scripts:
-      - name: Download IPA from OneDrive
+      - name: Download IPA from Google Drive (Large File Safe)
         script: |
-          curl -L "https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3UvYy85N2Q3MDE5ZGZhMDkyNmY4L0lRQUJXaVlnek5rZ1NaSVQ0NDh2dHdUOEFSd2s0Wm5VRFd3MkhVWFl0SGFlNzE4P2U9NTNpbmk3/root/content" -o app.ipa
+          FILE_ID="1lD2AbVzSQVl4JvYyCWsLv-t_k1i8BEy_"
+          FILE_NAME="app.ipa"
+
+          CONFIRM=$(curl -sc /tmp/cookie "https://drive.google.com/uc?export=download&id=$FILE_ID" \
+            | grep -o 'confirm=[^&]*' | sed 's/confirm=//')
+
+          curl -Lb /tmp/cookie "https://drive.google.com/uc?export=download&confirm=$CONFIRM&id=$FILE_ID" -o $FILE_NAME
+
+      - name: Verify IPA
+        script: |
+          echo "Checking file..."
+          file app.ipa
+          ls -lh app.ipa
 
       - name: Create API Key File
         script: |
